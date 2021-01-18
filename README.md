@@ -1,6 +1,5 @@
 # moreOrLess - Pure NodeJS Game 
 
-## Welcome in the tutorial 
 The purpose of the game is to guess the number. The fewer attempts, the better your score will be.
 
 
