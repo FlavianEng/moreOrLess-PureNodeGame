@@ -7,7 +7,7 @@ const baseURL = `http://localhost:${port}`;
 const regex = new RegExp('^[0-9]+$');
 
 // Activate console logs
-const debug = true;
+const debug = false;
 
 let startedGame = false;
 let minValue = null;
