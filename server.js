@@ -84,7 +84,6 @@ const server = http.createServer((req, res) => {
     console.log("DEBUG ==> minValue", minValue);
     console.log("DEBUG ==> maxValue", maxValue);
     console.log("DEBUG ==> numberToGuess", numberToGuess);
-
   };
 
   if (lastUrl === '/' && req.method === 'GET') {
@@ -93,84 +92,90 @@ const server = http.createServer((req, res) => {
       return;
     }
     res.end(`Come on guy ! A game is already underway ♡( ◡‿◡ ) \n${msgResume} `);
-  } else
+    return;
+  }
 
-    if (lastUrl === '/party/' && req.method === 'POST') {
+  if (lastUrl === '/party/' && req.method === 'POST') {
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk;
+    });
+
+    req.on('end', () => {
+      minValue = params.get('min');
+      maxValue = params.get('max');
+      if (minValue < maxValue && minValue && maxValue) {
+        startGame();
+        res.end(`Perfect ! The game is ready ! \nThe number to be guessed is between ${minValue} included et ${maxValue} included \n${msgResume} `);
+        return;
+      }
+      res.end('Something wrong happened (っ˘̩╭╮˘̩)っ \n\nYOURMIN can\'t be inferior or equal to YOURMAX and they have to be completed by a valid integer');
+    });
+    return;
+  }
+
+  if (lastUrl === '/party/current/' && req.method === 'PUT') {
+    if (startedGame) {
       let data = '';
       req.on('data', chunk => {
         data += chunk;
-      });
-
+      })
       req.on('end', () => {
-        minValue = params.get('min');
-        maxValue = params.get('max');
-        if (minValue < maxValue && minValue && maxValue) {
-          startGame();
-          res.end(`Perfect ! The game is ready ! \nThe number to be guessed is between ${minValue} included et ${maxValue} included \n${msgResume} `);
-          return;
-        }
-        res.end('Something wrong happened (っ˘̩╭╮˘̩)っ \n\nYOURMIN can\'t be inferior or equal to YOURMAX and they have to be completed by a valid integer');
-      });
-    } else
+        numberValue = params.get('number');
+        numberValues.push(numberValue);
 
-      if (lastUrl === '/party/current/' && req.method === 'PUT') {
-        if (startedGame) {
-          let data = '';
-          req.on('data', chunk => {
-            data += chunk;
-          })
-          req.on('end', () => {
-            numberValue = params.get('number');
-            numberValues.push(numberValue);
-
-            if (regex.test(numberValue)) {
-              if (numberValue > numberToGuess) {
-                res.end('It\'s less !');
-              } else if (numberValue < numberToGuess) {
-                res.end('It\'s more !');
-              } else {
-                res.end(`Congrats (◕‿◕) \nThe number was ${numberToGuess} \n\n${msgRematch}`);
-                scores.push(numberValues.length);
-                resetGame();
-              }
-            } else {
-              res.end(`The parameter passed have to be a valid integer`);
-            }
-
-          })
-          return;
-        }
-        res.end(`${msgWelcome}`);
-      } else
-
-        if (lastUrl === '/party/current' && req.method === 'GET') {
-          if (numberValues.length) {
-            res.end(`The number to be guessed is between ${minValue} included et ${maxValue} included \nThe last numbers plays was ${numberValues}`);
-            return;
+        if (regex.test(numberValue)) {
+          if (numberValue > numberToGuess) {
+            res.end('It\'s less !');
+          } else if (numberValue < numberToGuess) {
+            res.end('It\'s more !');
+          } else {
+            res.end(`Congrats (◕‿◕) \nThe number was ${numberToGuess} \n\n${msgRematch}`);
+            scores.push(numberValues.length);
+            resetGame();
           }
-          res.end(msgWelcome);
-        } else
+        } else {
+          res.end(`The parameter passed have to be a valid integer`);
+        }
 
-          if (lastUrl === '/scores' && req.method === 'GET') {
-            if (scores.length) {
-              res.end(`Thank you for playing, I feel better now (❤ω❤) \nBy the way, here's your top 10 ! \nTo make the best scores, try \n\nSCOREBOARD :\n============\n\n${displayScore()}`)
-              return;
-            }
-            res.end(`I feel alone ლ(ಠ_ಠ ლ) Play to make me feel better  \n\n\n\n${msgWelcome}`)
-          } else
+      })
+      return;
+    }
+    res.end(`${msgWelcome}`);
+    return;
+  }
 
-            if (lastUrl === '/rematch' && req.method === 'POST') {
-              if (startedGame) {
-                resetGame();
-                startGame();
-                res.end(`Rematch is ready ! \nThe number to be guessed is between ${minValue} included et ${maxValue} included\n\n${msgResume}`);
-                return;
-              }
-              res.end(`${msgWelcome}`);
-            } else
+  if (lastUrl === '/party/current' && req.method === 'GET') {
+    if (numberValues.length) {
+      res.end(`The number to be guessed is between ${minValue} included et ${maxValue} included \nThe last numbers plays was ${numberValues}`);
+      return;
+    }
+    res.end(msgWelcome);
+    return;
+  }
 
-              if (lastUrl === '/tuto') {
-                res.end(`*** Welcome in the tutorial ***\n 
+  if (lastUrl === '/scores' && req.method === 'GET') {
+    if (scores.length) {
+      res.end(`Thank you for playing, I feel better now (❤ω❤) \nBy the way, here's your top 10 ! \nTo make the best scores, try \n\nSCOREBOARD :\n============\n\n${displayScore()}`)
+      return;
+    }
+    res.end(`I feel alone ლ(ಠ_ಠ ლ) Play to make me feel better  \n\n\n\n${msgWelcome}`);
+    return;
+  }
+
+  if (lastUrl === '/rematch' && req.method === 'POST') {
+    if (startedGame) {
+      resetGame();
+      startGame();
+      res.end(`Rematch is ready ! \nThe number to be guessed is between ${minValue} included et ${maxValue} included\n\n${msgResume}`);
+      return;
+    }
+    res.end(`${msgWelcome}`);
+    return;
+  }
+
+  if (lastUrl === '/tuto') {
+    res.end(`*** Welcome in the tutorial ***\n 
     -------------------------------------- \n
     The purpose of the game is to guess the\n
     number. The fewer attempts, the better\n
@@ -190,19 +195,21 @@ const server = http.createServer((req, res) => {
     NOTE: The fewer attempts, the better your score will be. \n\n
 
     Have fun and good luck (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
-    `)
-              } else
+    `);
+    return;
+  }
 
-                if (lastUrl === '/secret') {
-                  res.end(`
+  if (lastUrl === '/secret') {
+    res.end(`
     Seems like there just dust and a spider here \n
     Seriously get a job instead of playing this game
     \n
     /╲/\\╭[☉﹏☉]╮/\\╱\\
     `);
-                } else {
-                  res.end(`Seems like your lost ヽ(°〇°)ﾉ \nTo find your way back, type 'http://localhost:1117/tuto' [ALL METHODS]`);
-                }
+    return;
+  }
+
+  res.end(`Seems like your lost ヽ(°〇°)ﾉ \nTo find your way back, type 'http://localhost:1117/tuto' [ALL METHODS]`);
 });
 
 server.listen(port, () => {
