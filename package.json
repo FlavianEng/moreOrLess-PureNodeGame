@@ -1,0 +1,24 @@
+{
+  "name": "moreorless-purenodegame",
+  "version": "1.0.0",
+  "description": "The purpose of the game is to guess the number. The fewer attempts, the better your score will be.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FlavianEng/moreOrLess-PureNodeGame.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FlavianEng/moreOrLess-PureNodeGame/issues"
+  },
+  "homepage": "https://github.com/FlavianEng/moreOrLess-PureNodeGame#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  }
+}
